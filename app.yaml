@@ -1,0 +1,6 @@
+runtime: java21
+entrypoint: java -jar target/quads-1.jar
+service: default
+
+env_variables:
+  SPRING_PROFILES_ACTIVE: "production"
