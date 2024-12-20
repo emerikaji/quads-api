@@ -60,6 +60,14 @@
         </dependency>
 
 		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>apache-jena-libs</artifactId>
+			<version>5.2.0</version>
+			<type>pom</type>
+		</dependency>
+
+
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-tomcat</artifactId>
 			<scope>provided</scope>

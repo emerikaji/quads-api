@@ -13,11 +13,11 @@ The parameters allow filtering over any part of the quad.
 #### Specification
 
 Query params:
-- graph
-- subject
-- predicate
-- object
-- cursor
+- graph (string)
+- subject (string)
+- predicate (string)
+- object (string)
+- cursor (string)
 
 Example result:
 ```json
@@ -44,8 +44,8 @@ This method creates a quad from its json, and returns that quad if it was added 
 Headers:
 - Authorization: Bearer jwt
 
-Body:
-- json Quad
+Body (json):
+- Quad (json Object)
 
 Body example:
 ```json
@@ -66,4 +66,26 @@ Example result:
     "predicate": "examplePredicate",
     "object": "exampleObject"
 }
+```
+
+### POST /api/quads/file
+
+#### Description
+
+This method creates all the triples contained in a given .ttl file, within the specified graph name. It returns the list of the added triples.
+
+#### Specification
+
+Headers:
+- Authorization: Bearer jwt
+
+Body (FORM):
+- graphName (string)
+- file (string/file)
+
+Example result:
+```json
+[
+    {"id":5629499534213120,"graph":"http://example.com/graph","subject":"http://example.com/Subject1","predicate":"http://schema.org/predicate1","object":"Object1"},{"id":5066549580791808,"graph":"http://example.com/graph","subject":"http://example.com/Subject2","predicate":"http://schema.org/predicate2","object":"Object2"},{"id":6192449487634432,"graph":"http://example.com/graph","subject":"http://example.com/Subject3","predicate":"http://schema.org/predicate3","object":"Object3"},
+]
 ```

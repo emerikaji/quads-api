@@ -1,5 +1,6 @@
 package com.bigdatam1.quads;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,10 +13,15 @@ import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.cloud.spring.data.datastore.core.DatastoreResultsIterable;
 import com.google.cloud.spring.data.datastore.core.DatastoreTemplate;
-import org.springframework.security.core.Authentication;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Statement;
 
 @RestController
 @RequestMapping("/api/quads")
@@ -31,6 +37,29 @@ public class QuadController {
     @PostMapping
     public Quad createQuad(@RequestBody Quad quad, Authentication authentication) {
         return quadRepository.save(quad);
+    }
+
+    @PostMapping("/file")
+    public List<Quad> uploadQuads(@RequestParam("file") MultipartFile file, @RequestParam("graphName") String graphName, Authentication authentication) {
+        List<Quad> quads = new ArrayList<>();
+        
+        try (InputStream inputStream = file.getInputStream()) {
+            Model model = ModelFactory.createDefaultModel();
+            model.read(inputStream, null, "TTL");
+
+            for (Statement stmt : model.listStatements().toList()) {
+                Quad quad = new Quad();
+                quad.setGraph(graphName);
+                quad.setSubject(stmt.getSubject().toString());
+                quad.setPredicate(stmt.getPredicate().toString());
+                quad.setObject(stmt.getObject().toString());
+                quads.add(quadRepository.save(quad));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to process the file", e);
+        }
+
+        return quads;
     }
     
     @GetMapping
