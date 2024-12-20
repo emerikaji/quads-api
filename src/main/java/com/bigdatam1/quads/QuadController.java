@@ -18,10 +18,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.riot.RDFLanguages;
+import org.apache.jena.riot.RDFParser;
+import org.apache.jena.riot.system.StreamRDF;
+import org.apache.jena.riot.system.StreamRDFBase;
 
 @RestController
 @RequestMapping("/api/quads")
@@ -42,19 +43,24 @@ public class QuadController {
     @PostMapping("/file")
     public List<Quad> uploadQuads(@RequestParam("file") MultipartFile file, @RequestParam("graphName") String graphName, Authentication authentication) {
         List<Quad> quads = new ArrayList<>();
-        
-        try (InputStream inputStream = file.getInputStream()) {
-            Model model = ModelFactory.createDefaultModel();
-            model.read(inputStream, null, "TTL");
 
-            for (Statement stmt : model.listStatements().toList()) {
+        StreamRDF streamRDF = new StreamRDFBase() {
+            @Override
+            public void triple(Triple triple) {
                 Quad quad = new Quad();
                 quad.setGraph(graphName);
-                quad.setSubject(stmt.getSubject().toString());
-                quad.setPredicate(stmt.getPredicate().toString());
-                quad.setObject(stmt.getObject().toString());
+                quad.setSubject(triple.getSubject().toString());
+                quad.setPredicate(triple.getPredicate().toString());
+                quad.setObject(triple.getObject().toString());
                 quads.add(quadRepository.save(quad));
             }
+        };
+        
+        try (InputStream inputStream = file.getInputStream()) {
+            RDFParser.create()
+                .source(inputStream)
+                .lang(RDFLanguages.TURTLE)
+                .parse(streamRDF);
         } catch (Exception e) {
             throw new RuntimeException("Failed to process the file", e);
         }

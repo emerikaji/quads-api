@@ -1,6 +1,0 @@
-@prefix ex: <http://example.com/> .
-@prefix schema: <http://schema.org/> .
-
-ex:Subject1 schema:predicate1 "Object1" .
-ex:Subject2 schema:predicate2 "Object2" .
-ex:Subject3 schema:predicate3 "Object3" .
